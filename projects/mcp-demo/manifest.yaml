@@ -1,0 +1,19 @@
+agent_name: demo-agent
+version: 0.1
+
+capabilities:
+  - name: document_read
+    description: Can read documents
+  - name: web_search
+    description: Mock web search
+
+context:
+  - name: user_profile
+    type: inline
+    value: |
+      name: Alex
+      role: researcher
+
+  - name: recent_documents
+    type: external
+    source: ../doc-rag/example_data
