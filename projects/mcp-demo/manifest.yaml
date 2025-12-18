@@ -1,19 +1,24 @@
-agent_name: demo-agent
-version: 0.1
+agent:
+  name: "local-mcp-agent"
+  version: "1.0"
 
-capabilities:
-  - name: document_read
-    description: Can read documents
-  - name: web_search
-    description: Mock web search
+llm:
+  model: "google/flan-t5-small"
 
 context:
   - name: user_profile
-    type: inline
-    value: |
-      name: Amruth
-      role: researcher
+    type: file
+    path: contexts/profile.json
 
-  - name: recent_documents
-    type: external
-    source: ../doc-rag/example_data
+tools:
+  reader:
+    module: "tools.reader"
+  search:
+    module: "tools.search"
+  summarize:
+    module: "tools.summarize"
+
+capabilities:
+  - document_read
+  - web_search
+  - summarization

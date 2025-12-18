@@ -1,0 +1,9 @@
+Agentic AI: 
+Agentic AI refers to artificial intelligence systems designed to operate with a degree of autonomy, enabling them to perceive goals, make decisions, and take actions without constant human direction. Unlike traditional AI models that respond only to explicit prompts, agentic AI systems manage workflows, break down complex tasks, and iteratively improve their results through feedback loops.
+Key characteristics of agentic AI include:
+• Goal-driven behavior: Systems can interpret objectives and generate multi-step plans.
+• Tool use: Agents can access external tools, APIs, search engines, code runners to expand capability.
+• Self-critique and refinement: They evaluate their own outputs and make improvements.
+• Autonomy with safeguards: Human oversight, permission boundaries, and safe-execution layers guide behavior.
+Agentic AI is increasingly used in research automation, software engineering, business operations, and knowledge work. As models become more capable, designing guardrails, transparency mechanisms, and reliable evaluation frameworks remains essential to ensure responsible deployment.
+

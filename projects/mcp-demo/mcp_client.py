@@ -1,36 +1,48 @@
 import yaml
 import json
-from pathlib import Path
-import sys
+import importlib
+import inspect
+from types import FunctionType
 
-def load_manifest(path):
-    with open(path, "r") as fh:
-        return yaml.safe_load(fh)
+class MCPClient:
+    def __init__(self, manifest_path="manifest.yaml"):
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            self.manifest = yaml.safe_load(f)
 
-def assemble_context(manifest):
-    ctx = {
-        "agent": {
-            "name": manifest["agent_name"],
-            "version": manifest["version"]
-        },
-        "capabilities": manifest.get("capabilities", []),
-        "context": {}
-    }
+    def load_context(self):
+        ctx = {}
+        for entry in self.manifest.get("context", []):
+            if entry["type"] == "file":
+                with open(entry["path"], "r") as f:
+                    ctx[entry["name"]] = json.load(f)
+        return ctx
 
-    for c in manifest.get("context", []):
-        if c["type"] == "inline":
-            ctx["context"][c["name"]] = c["value"]
-        else:
-            p = Path(c["source"])
-            if p.exists():
-                ctx["context"][c["name"]] = [str(x) for x in p.glob("*")]
-            else:
-                ctx["context"][c["name"]] = []
+    def load_tools(self):
+        tools = {}
 
-    return ctx
+        for tool_name, data in self.manifest.get("tools", {}).items():
+            module_name = data["module"]
 
-if __name__ == "__main__":
-    file = sys.argv[1] if len(sys.argv) > 1 else "manifest.yaml"
-    manifest = load_manifest(file)
-    ctx = assemble_context(manifest)
-    print(json.dumps(ctx, indent=2))
+            try:
+                module = importlib.import_module(module_name)
+            except Exception as e:
+                print(f"[ERROR] Could not import module '{module_name}': {e}")
+                tools[tool_name] = {}
+                continue
+
+            # ONLY load functions defined INSIDE the module (not imported classes!)
+            functions = {
+                name: fn
+                for name, fn in module.__dict__.items()
+                if isinstance(fn, FunctionType) and not name.startswith("_")
+            }
+
+            if not functions:
+                print(f"[WARNING] Tool '{tool_name}' from module '{module_name}' has no usable functions.")
+
+            tools[tool_name] = functions
+
+        return tools
+
+    def get_model_name(self):
+        return self.manifest["llm"]["model"]
