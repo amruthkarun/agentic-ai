@@ -11,7 +11,7 @@ context:
   - name: user_profile
     type: inline
     value: |
-      name: Alex
+      name: Amruth
       role: researcher
 
   - name: recent_documents
