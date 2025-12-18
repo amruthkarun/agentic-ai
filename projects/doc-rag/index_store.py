@@ -10,14 +10,20 @@ MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 def build_index(docs_json: str, index_path: str, meta_path: str):
     model = SentenceTransformer(MODEL)
 
-    with open(docs_json, "r", encoding="utf-8") as fh:
-        docs = json.load(fh)
+    texts = []
+    metas = []
 
-    texts = [d["text"] for d in docs]
-    metas = [
-        {"doc_id": d["doc_id"], "chunk_id": d["chunk_id"], "source_path": d["source_path"]}
-        for d in docs
-    ]
+    with open(docs_json, "r", encoding="utf-8") as fh:
+        for line in fh:
+            if not line.strip():
+                continue
+            d = json.loads(line)
+            texts.append(d["text"])
+            metas.append({
+                "doc_id": d["doc_id"],
+                "chunk_id": d["chunk_id"],
+                "source_path": d["source_path"]
+            })
 
     embeddings = model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
     dim = embeddings.shape[1]
@@ -30,7 +36,8 @@ def build_index(docs_json: str, index_path: str, meta_path: str):
     with open(meta_path, "wb") as fh:
         pickle.dump(metas, fh)
 
-    print("Index + metadata saved.")
+    print(f"Saved index to {index_path} and metadata to {meta_path}")
+
 
 def load_index(index_path: str, meta_path: str):
     index = faiss.read_index(index_path)
